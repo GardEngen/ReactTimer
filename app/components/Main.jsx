@@ -1,6 +1,5 @@
 var React = require("react");
 var Nav = require("Nav");
-var Timer = require("Timer");
 // var Main = React.createClass({
 //     render: function () {
 //         return (
@@ -22,8 +21,8 @@ var Main =  (props) =>{
             <div>
                 <div>
                     <Nav/>
+                    <p>Main.jsx</p>
                 {props.children}
-                <Timer/>
 
             </div>
             </div>
