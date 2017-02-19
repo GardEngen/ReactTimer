@@ -1,52 +1,74 @@
-var React = require("react");
-var Clock = require("Clock");
-var CountdownForm = require("CountdownForm");
+var React = require('react');
+var Clock = require('Clock');
+var CountdownForm = require('CountdownForm');
+var Controls = require('Controls');
 
-var Countdown =  React.createClass({
+var Countdown = React.createClass({
     getInitialState: function () {
-        return{
+        return {
             count: 0,
-            countdownStatus: "stopped"
-
+            countdownStatus: 'stopped'
         };
     },
     componentDidUpdate: function (prevProps, prevState) {
-     if (this.state.countdownStatus !== prevState.countdownStatus){
-         switch (this.state.countdownStatus){
-             case "started":
-                 this.startTimer();
-                 break;
-         }
-     }
+        if (this.state.countdownStatus !== prevState.countdownStatus) {
+            switch (this.state.countdownStatus) {
+                case 'started':
+                    this.startTimer();
+                    break;
+                case 'stopped':
+                    this.setState({count: 0});
+                case 'paused':
+                    clearInterval(this.timer)
+                    this.timer = undefined;
+                    break;
+            }
+        }
+    },
+    componentWillUnmount: function () {
+      clearInterval(this.timer)
+        this.timer = undefined;
     },
     startTimer: function () {
-      this.timer = setInterval(() =>{
-           var newCount = this.state.count - 1;
-           this.setState({
-               //sjekker om newCount er større enn 0, hvis den er det så bruker vi 0
-               count: newCount >= 0 ? newCount : 0
-           });
+        this.timer = setInterval(() => {
+            var newCount = this.state.count - 1;
+            this.setState({
+                //sjekker om newCount er større enn 0, hvis den er det så bruker vi 0
+                count: newCount >= 0 ? newCount : 0
+            });
+
+            if(newCount === 0){
+                this.setState({countdownStatus: "stopped"});
+            }
         }, 1000);
     },
-
     handleSetCountdown: function (seconds) {
         this.setState({
             count: seconds,
-            countdownStatus: "started"
-        })
+            countdownStatus: 'started'
+        });
+    },
+    handleStatusChange: function (newStatus) {
+        this.setState({countdownStatus: newStatus});
     },
     render: function () {
-        var {count} = this.state;
+        var {count, countdownStatus} = this.state;
+        var renderControlArea = () => {
+            if (countdownStatus !== 'stopped') {
+                return <Controls countdownStatus={countdownStatus} onStatusChange={this.handleStatusChange}/>;
+            } else {
+                return <CountdownForm onSetCountdown={this.handleSetCountdown}/>;
+            }
+        };
+
         return (
             <div>
+                <h1 className="page-title">CountdownApp</h1>
                 <Clock totalSeconds={count}/>
-                <CountdownForm onSetCountdown={this.handleSetCountdown} />
+                {renderControlArea()}
             </div>
         );
-
     }
-
-
 });
 
 module.exports = Countdown;
